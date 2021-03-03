@@ -1,3 +1,8 @@
 <resources>
-    <string name="app_name">PizzaLovesYou</string>
+    <string name="app_name">Pizza Loves You</string>
+    <string name="start_service">Start Service</string>
+    <string name="msg_start">%1$s will send you some love. :)</string>
+    <string name="stop_service">Stop Service</string>
+    <string name="msg_stop">Stop Service</string>
+    <string name="msg_error">Who do you need corporate love from?</string>
 </resources>
