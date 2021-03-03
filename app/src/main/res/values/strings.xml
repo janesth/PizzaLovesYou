@@ -5,4 +5,7 @@
     <string name="stop_service">Stop Service</string>
     <string name="msg_stop">Stop Service</string>
     <string name="msg_error">Who do you need corporate love from?</string>
+    <string name="msg_running">Already running.</string>
+
+    <string name="notif_sender">Message from: %1$s</string>
 </resources>

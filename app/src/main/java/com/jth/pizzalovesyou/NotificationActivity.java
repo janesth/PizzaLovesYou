@@ -4,31 +4,43 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.work.Data;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.common.util.concurrent.ListenableFuture;
+
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 
 public class NotificationActivity extends AppCompatActivity {
 
     PeriodicWorkRequest notificationWorker;
+    String GLOBAL_COMPANY;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if(!isServiceNotRunning()) {
+            ((EditText) findViewById(R.id.edit_company)).setText(getResources().getString(R.string.msg_running));
+            ((EditText) findViewById(R.id.edit_company)).setEnabled(false);
+        }
     }
 
     public void startService(View view) {
         if(validateCompany((EditText) findViewById(R.id.edit_company))) {
 
             Data inputData = new Data.Builder()
-                    .putString("COMPANY", ((EditText) findViewById(R.id.edit_company)).getText().toString())
+                    .putString("data_company", ((EditText) findViewById(R.id.edit_company)).getText().toString())
                     .build();
 
             notificationWorker = new PeriodicWorkRequest.Builder(
@@ -62,6 +74,25 @@ public class NotificationActivity extends AppCompatActivity {
         } else {
             if(editText.getText().toString().isEmpty()) {
                 return false;
+            }
+        }
+        return true;
+    }
+
+    protected boolean isServiceNotRunning() {
+        ListenableFuture<List<WorkInfo>> listenableFuture = WorkManager.getInstance().getWorkInfosByTag("notificationWorker");
+        if(listenableFuture != null) {
+            try {
+                List<WorkInfo> workInfos = listenableFuture.get();
+                if (!workInfos.isEmpty()) {
+                    for(WorkInfo workInfo : workInfos) {
+                        return workInfo.getState().isFinished();
+                    }
+                }
+            } catch (InterruptedException ex) {
+                Log.e(NotificationActivity.class.getName(), "An interruption of some sorts.");
+            } catch (ExecutionException ex) {
+                Log.e(NotificationActivity.class.getName(), "Something about execution.");
             }
         }
         return true;

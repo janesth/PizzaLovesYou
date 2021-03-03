@@ -24,14 +24,8 @@ public class NotificationWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        CharSequence company = getInputData().getString("COMPANY");
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), "PIZZA_CHANNEL")
-                .setSmallIcon(R.mipmap.ic_pizza)
-                .setContentTitle(company)
-                .setContentText("Thinking about you")
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setStyle(new NotificationCompat.BigTextStyle()
-                            .bigText("Does this work?"));
+        CharSequence company = getInputData().getString("data_company");
+        NotificationCompat.Builder builder = setupBuilder(company);
         notificationManager.notify(1, builder.build());
         return Result.success();
     }
@@ -46,5 +40,19 @@ public class NotificationWorker extends Worker {
         notificationChannel.enableVibration(true);
         notificationChannel.setVibrationPattern(new long[]{1000, 2000});
         notificationManager.createNotificationChannel(notificationChannel);
+    }
+
+    protected NotificationCompat.Builder setupBuilder(CharSequence company) {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), "PIZZA_CHANNEL");
+
+        //Set content
+        builder.setSmallIcon(R.mipmap.ic_pizza);
+        builder.setContentTitle(String.format(getApplicationContext().getResources().getString(R.string.notif_sender), company));
+        builder.setContentText("Hope you're ok " + new String(Character.toChars(0x1F60A)));
+
+        //div. settings
+        builder.setPriority(NotificationCompat.PRIORITY_HIGH);
+
+        return builder;
     }
 }
