@@ -28,24 +28,26 @@ public class NotificationActivity extends AppCompatActivity {
     //OneTimeWorkRequest notificationWorker;
 
     PeriodicWorkRequest notificationWorker;
-    String GLOBAL_COMPANY;
+
+    EditText edit_company;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        edit_company = (EditText) findViewById(R.id.edit_company);
         if (!isServiceNotRunning()) {
-            ((EditText) findViewById(R.id.edit_company)).setText(getResources().getString(R.string.msg_running));
-            ((EditText) findViewById(R.id.edit_company)).setEnabled(false);
+            edit_company.setText(getResources().getString(R.string.msg_running));
+            edit_company.setEnabled(false);
         }
     }
 
     public void startService(View view) {
-        if (validateCompany((EditText) findViewById(R.id.edit_company))) {
+        if (validateCompany(edit_company)) {
 
             Data inputData = new Data.Builder()
-                    .putString("data_company", ((EditText) findViewById(R.id.edit_company)).getText().toString())
+                    .putString("data_company", edit_company.getText().toString())
                     .build();
 
             notificationWorker = new PeriodicWorkRequest.Builder(
@@ -73,9 +75,8 @@ public class NotificationActivity extends AppCompatActivity {
                             notificationWorker);
             */
 
-
-            ((EditText) findViewById(R.id.edit_company)).setEnabled(false);
-            Toast.makeText(getApplicationContext(), String.format(getResources().getString(R.string.msg_start), ((EditText) findViewById(R.id.edit_company)).getText()), Toast.LENGTH_LONG).show();
+            edit_company.setEnabled(false);
+            Toast.makeText(getApplicationContext(), String.format(getResources().getString(R.string.msg_start), edit_company.getText()), Toast.LENGTH_LONG).show();
         } else {
             Toast.makeText(getApplicationContext(), getResources().getString(R.string.msg_error), Toast.LENGTH_LONG).show();
         }
@@ -83,7 +84,7 @@ public class NotificationActivity extends AppCompatActivity {
 
     public void stopService(View view) {
         WorkManager.getInstance().cancelUniqueWork("notificationWorker");
-        ((EditText) findViewById(R.id.edit_company)).setEnabled(true);
+        edit_company.setEnabled(true);
         Toast.makeText(getApplicationContext(), getResources().getString(R.string.msg_stop), Toast.LENGTH_LONG).show();
     }
 
