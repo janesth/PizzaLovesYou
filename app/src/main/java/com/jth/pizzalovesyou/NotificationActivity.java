@@ -3,6 +3,8 @@ package com.jth.pizzalovesyou;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.work.Data;
 import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.ExistingWorkPolicy;
+import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
@@ -22,6 +24,9 @@ import java.util.concurrent.TimeUnit;
 
 public class NotificationActivity extends AppCompatActivity {
 
+    // ENABLE ONETIMEWORKREQUEST FOR TESTING
+    //OneTimeWorkRequest notificationWorker;
+
     PeriodicWorkRequest notificationWorker;
     String GLOBAL_COMPANY;
 
@@ -30,14 +35,14 @@ public class NotificationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if(!isServiceNotRunning()) {
+        if (!isServiceNotRunning()) {
             ((EditText) findViewById(R.id.edit_company)).setText(getResources().getString(R.string.msg_running));
             ((EditText) findViewById(R.id.edit_company)).setEnabled(false);
         }
     }
 
     public void startService(View view) {
-        if(validateCompany((EditText) findViewById(R.id.edit_company))) {
+        if (validateCompany((EditText) findViewById(R.id.edit_company))) {
 
             Data inputData = new Data.Builder()
                     .putString("data_company", ((EditText) findViewById(R.id.edit_company)).getText().toString())
@@ -55,24 +60,38 @@ public class NotificationActivity extends AppCompatActivity {
                             "notificationWorker",
                             ExistingPeriodicWorkPolicy.REPLACE,
                             notificationWorker);
+
+            // ENABLE ONETIMEWORKREQUEST FOR TESTING
+            /*
+            notificationWorker = new OneTimeWorkRequest.Builder(NotificationWorker.class)
+                    .setInputData(inputData)
+                    .build();
+
+            WorkManager.getInstance()
+                    .enqueueUniqueWork("notificationWorker",
+                            ExistingWorkPolicy.REPLACE,
+                            notificationWorker);
+            */
+
+
             ((EditText) findViewById(R.id.edit_company)).setEnabled(false);
-            Toast.makeText(getApplicationContext(), String.format(getResources().getString(R.string.msg_start), ((EditText) findViewById(R.id.edit_company)).getText()) , Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), String.format(getResources().getString(R.string.msg_start), ((EditText) findViewById(R.id.edit_company)).getText()), Toast.LENGTH_LONG).show();
         } else {
-            Toast.makeText(getApplicationContext(), getResources().getString(R.string.msg_error) , Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), getResources().getString(R.string.msg_error), Toast.LENGTH_LONG).show();
         }
     }
 
     public void stopService(View view) {
         WorkManager.getInstance().cancelUniqueWork("notificationWorker");
         ((EditText) findViewById(R.id.edit_company)).setEnabled(true);
-        Toast.makeText(getApplicationContext(), getResources().getString(R.string.msg_stop) , Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), getResources().getString(R.string.msg_stop), Toast.LENGTH_LONG).show();
     }
 
     protected boolean validateCompany(EditText editText) {
-        if(editText.getText() == null) {
+        if (editText.getText() == null) {
             return false;
         } else {
-            if(editText.getText().toString().isEmpty()) {
+            if (editText.getText().toString().isEmpty()) {
                 return false;
             }
         }
@@ -81,11 +100,11 @@ public class NotificationActivity extends AppCompatActivity {
 
     protected boolean isServiceNotRunning() {
         ListenableFuture<List<WorkInfo>> listenableFuture = WorkManager.getInstance().getWorkInfosByTag("notificationWorker");
-        if(listenableFuture != null) {
+        if (listenableFuture != null) {
             try {
                 List<WorkInfo> workInfos = listenableFuture.get();
                 if (!workInfos.isEmpty()) {
-                    for(WorkInfo workInfo : workInfos) {
+                    for (WorkInfo workInfo : workInfos) {
                         return workInfo.getState().isFinished();
                     }
                 }
